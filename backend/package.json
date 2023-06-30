@@ -1,0 +1,24 @@
+{
+  "name": "btc-wallets-alerts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.350.0",
+    "@aws-sdk/client-eventbridge": "^3.350.0",
+    "@aws-sdk/client-lambda": "^3.350.0",
+    "@aws-sdk/client-sesv2": "^3.353.0",
+    "@types/aws-lambda": "^8.10.117"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.0",
+    "typescript": "^5.1.3"
+  }
+}

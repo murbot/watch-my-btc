@@ -1,0 +1,27 @@
+<h1>Contact</h1>
+<p class="lead">
+  I'd love to hear from you! Please use the form below to send me a message.
+  I'm open to suggestions for enhancements, new features and bug reports are
+  welcome. I'll do my best to respond to your message as soon as possible.
+  Thanks!
+</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div class="mb-3">
+    <label for="emailAddress" class="form-label">Email Address<sup>*</sup></label>
+    <input type="text" class="form-control" id="emailAddress" name="emailAddress" [formControl]="email" [class.bg-danger]="!email.disabled && (email.touched || message.dirty) && !email.valid"/>
+  </div>
+  <div class="mb-3">
+    <label for="message" class="form-label">Message<sup>*</sup></label>
+    <textarea class="form-control" id="message" name="message" rows="10" [formControl]="message" [class.bg-danger]="!message.disabled && (message.touched || message.dirty) && !message.valid"></textarea>
+    <p class="text-secondary">{{message.value.length}} of 1000 characters</p>
+  </div>
+  <div class="mb-3 text-center">
+    <div class="captcha-wrapper">
+      <re-captcha [siteKey]="recaptchaSiteKey" (resolved)="captchaResolved($event)" (errored)="captchaErrored($event)"></re-captcha>
+    </div>
+  </div>
+  <div class="mb-2">
+    <button class="btn btn-primary w-100 py-2" type="submit" [disabled]="!form.valid">Send</button>
+  </div>
+</form>

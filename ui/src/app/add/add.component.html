@@ -1,0 +1,29 @@
+<h1>BTC Transaction Alerts</h1>
+<p class="lead">
+  Get transaction alerts for a Bitcoin address. You may not want to use a personally identifiable email address ...
+</p>
+
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label for="emailAddress" class="form-label">Email Address<sup>*</sup></label>
+    <input type="text" class="form-control" id="emailAddress" name="emailAddress" [formControl]="email" [class.bg-danger]="!email.disabled && (email.touched || email.dirty) && !email.valid"/>
+  </div>
+  <div class="mb-3">
+    <label for="bitcoinAddress" class="form-label">Bitcoin Address<sup>*</sup></label>
+    <input type="text" class="form-control" id="bitcoinAddress" name="bitcoinAddress" [formControl]="address" [class.bg-danger]="!address.disabled && (address.touched || address.dirty) && !address.valid"/>
+  </div>
+  <div class="mb-3">
+    <label for="label" class="form-label">Label<sup>*</sup></label>
+    <input type="text" class="form-control" id="label" name="label" [formControl]="label" [class.bg-danger]="!label.disabled && (label.touched || label.dirty) && !label.valid"/>
+    <p class="text-secondary">{{label.value.length}} of 100 characters</p>
+  </div>
+  <div class="mb-3 text-center">
+    <div class="captcha-wrapper">
+      <re-captcha [siteKey]="recaptchaSiteKey" (resolved)="captchaResolved($event)" (errored)="captchaErrored($event)"></re-captcha>
+    </div>
+  </div>
+  <div class="mb-2">
+    <button class="btn btn-primary w-100 py-2" type="button" [disabled]="!form.valid" (click)="createAlert()">Add Alert</button>
+  </div>
+</form>
+
