@@ -3,6 +3,12 @@
 Watch My BTC is a service that watches for changes in Bitcoin address balances and sends alerts
 when a change is detected.
 
+The project is in a very early stage. I've open sourced the code in the interest of
+transparency and trust, and in the spirit of the Bitcoin community. My aim was not
+to create a polished, turn-key solution, although I may do that as another project. 
+I may implement the same functionality, but as an application that can run locally 
+or on any infrastructure, rather than specific to AWS.
+
 ## Hosted Version
 
 A hosted version of the service is available in the cloud and can be found at
