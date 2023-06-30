@@ -9,5 +9,5 @@ import {environment} from '../../environments/environment';
 export class DonateComponent
 {
   readonly donateBitcoinAddress = environment.donateBitcoinAddress;
-  readonly donateLightningAddress = environment.donateBitcoinAddress;
+  readonly donateLightningAddress = environment.donateLightningAddress;
 }
