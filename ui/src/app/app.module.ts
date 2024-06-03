@@ -13,6 +13,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {ToastContainerComponent} from './common/toast-container/toast-container.component';
 import {RemoveComponent} from './remove/remove.component';
 import {RecaptchaModule} from 'ng-recaptcha';
+import { LegalComponent } from './legal/legal.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import {RecaptchaModule} from 'ng-recaptcha';
     ContactComponent,
     HowItWorksComponent,
     ToastContainerComponent,
-    RemoveComponent
+    RemoveComponent,
+    LegalComponent
   ],
   imports: [
     BrowserModule,

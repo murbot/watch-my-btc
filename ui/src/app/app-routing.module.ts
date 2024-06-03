@@ -5,6 +5,7 @@ import {ContactComponent} from './contact/contact.component';
 import {DonateComponent} from './donate/donate.component';
 import {HowItWorksComponent} from './how-it-works/how-it-works.component';
 import {RemoveComponent} from './remove/remove.component';
+import {LegalComponent} from './legal/legal.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,10 @@ const routes: Routes = [
   {
     path: 'how-it-works',
     component: HowItWorksComponent
+  },
+  {
+    path: 'legal',
+    component: LegalComponent
   },
   {
     path: '',

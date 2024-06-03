@@ -37,6 +37,11 @@ export class AppComponent implements OnInit
       label: 'Contact',
       path: '/contact',
       active: false
+    },
+    {
+      label: 'Legal',
+      path: '/legal',
+      active: false
     }
   ];
 
