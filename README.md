@@ -9,6 +9,18 @@ to create a polished, turn-key solution, although I may do that as another proje
 I may implement the same functionality, but as an application that can run locally 
 or on any infrastructure, rather than specific to AWS.
 
+## Big Changes/Improvements Coming
+
+Proof of concept has been completed and I am in the early stages of rewriting this service. It has proven to be
+popular and so I will be completing a full rewrite, which will be far more robust and efficient. It will also bring
+a number of new features, such as:
+
+* xpub monitoring
+* Ability to view and manage all alerts and balances in a single dashboard
+* System health (a system status dashboard and api)
+* webhook support (and potentially other integrations: slack, telegram, etc)
+* Still thinking of others (feel free to suggest enhancements)
+
 ## Hosted Version
 
 A hosted version of the service is available in the cloud and can be found at

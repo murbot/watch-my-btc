@@ -1,5 +1,23 @@
-import {DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput} from '@aws-sdk/client-dynamodb';
-import {DeleteRuleCommand, DeleteRuleCommandInput, EventBridgeClient, PutRuleCommand, PutRuleCommandInput, PutTargetsCommand, PutTargetsCommandInput, RemoveTargetsCommand, RemoveTargetsCommandInput} from '@aws-sdk/client-eventbridge';
+import {
+  DeleteItemCommand,
+  DeleteItemCommandInput,
+  DynamoDBClient,
+  GetItemCommand,
+  GetItemCommandInput,
+  PutItemCommand,
+  PutItemCommandInput
+} from '@aws-sdk/client-dynamodb';
+import {
+  DeleteRuleCommand,
+  DeleteRuleCommandInput,
+  EventBridgeClient,
+  PutRuleCommand,
+  PutRuleCommandInput,
+  PutTargetsCommand,
+  PutTargetsCommandInput,
+  RemoveTargetsCommand,
+  RemoveTargetsCommandInput
+} from '@aws-sdk/client-eventbridge';
 import crypto from 'crypto';
 import {ValidationErrors} from './validation-errors';
 import {BwaError, NotFoundError, ValidationError} from './error-types';
@@ -21,14 +39,14 @@ export class AlertRuleService
    * @param label
    */
   static async createAlertRule(
-      email: string,
-      address: string,
-      label: string): Promise<CreateAlertRuleOutput>
+    email: string,
+    address: string,
+    label: string): Promise<CreateAlertRuleOutput>
   {
     await AlertRuleService.validateBaseAlertRule(
-        email,
-        address,
-        label);
+      email,
+      address,
+      label);
 
     let alertRule = await AlertRuleService.getAlertRuleDynamoItem(email);
     let alertRuleAddress: AlertRuleAddress;
@@ -37,11 +55,11 @@ export class AlertRuleService
       if (alertRule.addresses.find((a) => a.address === address) != null)
       {
         throw new BwaError(
-            'Already exists',
-            409);
+          'Already exists',
+          409);
       }
 
-      const balance = await AlertRuleService.retrieveBalances([ address ]);
+      const balance = await AlertRuleService.retrieveBalances([address]);
 
       alertRuleAddress = {
         address,
@@ -53,10 +71,9 @@ export class AlertRuleService
       alertRule.version = alertRule.version + 1;
 
       await AlertRuleService.putAlertRuleDynamoItem(alertRule as AlertRule);
-    }
-    else
+    } else
     {
-      const balance = await AlertRuleService.retrieveBalances([ address ]);
+      const balance = await AlertRuleService.retrieveBalances([address]);
 
       alertRuleAddress = {
         address,
@@ -85,12 +102,12 @@ export class AlertRuleService
   }
 
   static async deleteAlertRule(
-      email: string,
-      address: string): Promise<void>
+    email: string,
+    address: string): Promise<void>
   {
     await AlertRuleService.validateDeleteAlertRule(
-        email,
-        address);
+      email,
+      address);
 
     const alertRule = await AlertRuleService.getAlertRuleDynamoItem(email);
 
@@ -116,8 +133,7 @@ export class AlertRuleService
       await AlertRuleService.removeEventBridgeRuleTargets(alertRule.eventBridgeRuleName);
       await AlertRuleService.deleteEventBridgeRule(alertRule.eventBridgeRuleName);
       await AlertRuleService.deleteAlertRuleDynamoItem(email);
-    }
-    else
+    } else
     {
       alertRule.version++;
       await AlertRuleService.putAlertRuleDynamoItem(alertRule);
@@ -141,7 +157,7 @@ export class AlertRuleService
     }
 
     const blockchainDotComBalanceResponse =
-        await AlertRuleService.retrieveBalances(alertRule?.addresses.map(value => value.address) || []);
+      await AlertRuleService.retrieveBalances(alertRule?.addresses.map(value => value.address) || []);
     let balancesChanged = false;
     const addressesWithBalancesThatHaveChanged = [] as AddressWithChangedBalance[];
 
@@ -164,8 +180,7 @@ export class AlertRuleService
           oldBalance: previousBalance,
           newBalance: currentBalance
         });
-      }
-      else
+      } else
       {
         console.debug(`Balance for address ${address.address} has not changed from ${currentBalance}`);
       }
@@ -191,11 +206,10 @@ export class AlertRuleService
       message += 'Watch My BTC';
 
       await SesService.sendMessage(
-          email,
-          `${addressesWithBalancesThatHaveChanged.length} BTC Address Balances have Changed`,
-          message);
-    }
-    else
+        email,
+        `${addressesWithBalancesThatHaveChanged.length} BTC Address Balances have Changed`,
+        message);
+    } else
     {
       console.debug(`Balances for email ${email} have not changed`);
     }
@@ -208,21 +222,30 @@ export class AlertRuleService
    */
   static async retrieveBalances(addresses: string[]): Promise<BlockchainDotComBalanceResponse>
   {
-    const addressesString = addresses.join('|');
-    const response = await fetch(`https://blockchain.info/balance?active=${addressesString}`);
+    const batchSize = 50;
+    const balanceResponses: BlockchainDotComBalanceResponse = {};
 
-    if (response.status === 400)
+    for (let i = 0; i < addresses.length; i += batchSize)
     {
-      throw new ValidationError(
-          new ValidationErrors()
-              .addDetail(
-                  'The specified address is not valid',
-                  'address'))
+      const batch = addresses.slice(i, i + batchSize);
+      const addressesString = batch.join('|');
+      const response = await fetch(`https://blockchain.info/balance?active=${addressesString}`);
+
+      if (response.status === 400)
+      {
+        throw new ValidationError(
+          new ValidationErrors().addDetail('The specified address is not valid', 'address')
+        );
+      }
+
+      const batchResponse: BlockchainDotComBalanceResponse = await response.json();
+      Object.assign(balanceResponses, batchResponse);
+      console.debug(`Balance response: ${JSON.stringify(batchResponse)} from response ${JSON.stringify(response)} for addresses ${addressesString}`);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    const balanceResponse: BlockchainDotComBalanceResponse = await response.json();
-    console.debug(`Balance response: ${JSON.stringify(balanceResponse)} from response ${JSON.stringify(response)} for address ${addressesString}`);
-    return balanceResponse;
+    return balanceResponses;
   }
 
   static async putAlertRuleDynamoItem(alertRule: AlertRule): Promise<void>
@@ -261,14 +284,20 @@ export class AlertRuleService
 
     if (getItemCommandOutput.Item != null)
     {
-      return {
-        email: getItemCommandOutput.Item?.email?.S || '',
-        addresses: JSON.parse(getItemCommandOutput.Item?.addresses?.S || '[]'),
-        eventBridgeRuleName: getItemCommandOutput.Item?.eventBridgeRuleName?.S || '',
-        version: parseInt(getItemCommandOutput.Item?.version?.N || '0')
-      };
-    }
-    else
+      try
+      {
+        return {
+          email: getItemCommandOutput.Item?.email?.S || '',
+          addresses: JSON.parse(getItemCommandOutput.Item?.addresses?.S || '[]'),
+          eventBridgeRuleName: getItemCommandOutput.Item?.eventBridgeRuleName?.S || '',
+          version: parseInt(getItemCommandOutput.Item?.version?.N || '0')
+        };
+      } catch (err)
+      {
+        console.error(`Error parsing DynamoDB item: ${JSON.stringify(getItemCommandOutput)}`);
+        throw err;
+      }
+    } else
     {
       return null;
     }
@@ -316,11 +345,11 @@ export class AlertRuleService
   {
     const putTargetsCommandInput = {
       Rule: alertRuleItem.eventBridgeRuleName,
-      Targets: [ {
+      Targets: [{
         Id: await AlertRuleService.generateEventBridgeRuleTargetId(alertRuleItem.eventBridgeRuleName),
         Arn: processAlertRuleLambdaArn,
         Input: JSON.stringify({email: alertRuleItem.email} as EventBridgeRuleTargetInput)
-      } ],
+      }],
     } as PutTargetsCommandInput;
     console.debug(`Putting EventBridge rule targets: ${JSON.stringify(putTargetsCommandInput)}`);
     const putTargetsResponse = await eventBridgeClient.send(new PutTargetsCommand(putTargetsCommandInput));
@@ -331,7 +360,7 @@ export class AlertRuleService
   {
     const removeTargetsCommandInput = {
       Rule: eventBridgeRuleName,
-      Ids: [ await AlertRuleService.generateEventBridgeRuleTargetId(eventBridgeRuleName) ]
+      Ids: [await AlertRuleService.generateEventBridgeRuleTargetId(eventBridgeRuleName)]
     } as RemoveTargetsCommandInput;
     const removeTargetsCommand = new RemoveTargetsCommand(removeTargetsCommandInput);
     console.debug(`Removing EventBridge rule targets: ${JSON.stringify(removeTargetsCommand)}`);
@@ -350,29 +379,29 @@ export class AlertRuleService
   }
 
   static async validateBaseAlertRule(
-      email: string,
-      address: string,
-      label: string): Promise<void>
+    email: string,
+    address: string,
+    label: string): Promise<void>
   {
     const validationErrors = new ValidationErrors();
 
     if (email == null || email.length < 1)
     {
       validationErrors.addDetail(
-          'email is required',
-          'email');
+        'email is required',
+        'email');
     }
     if (address == null || address.length < 14 || address.length > 74)
     {
       validationErrors.addDetail(
-          'address is required and must be between 27 and 34 characters long',
-          'address');
+        'address is required and must be between 27 and 34 characters long',
+        'address');
     }
     if (label == null || label.length < 1 || label.length > 100)
     {
       validationErrors.addDetail(
-          'label is required and must be between 1 and 100 characters long',
-          'label');
+        'label is required and must be between 1 and 100 characters long',
+        'label');
     }
 
     if (validationErrors.hasErrors())
@@ -382,22 +411,22 @@ export class AlertRuleService
   }
 
   static async validateDeleteAlertRule(
-      email: string,
-      address: string): Promise<void>
+    email: string,
+    address: string): Promise<void>
   {
     const validationErrors = new ValidationErrors();
 
     if (email == null || email.length < 1)
     {
       validationErrors.addDetail(
-          'email is required',
-          'email');
+        'email is required',
+        'email');
     }
     if (address == null || address.length < 14 || address.length > 74)
     {
       validationErrors.addDetail(
-          'address is required and must be between 27 and 34 characters long',
-          'address');
+        'address is required and must be between 27 and 34 characters long',
+        'address');
     }
 
     if (validationErrors.hasErrors())
