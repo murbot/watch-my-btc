@@ -167,7 +167,7 @@ export class AlertRuleService
       const previousBalance = address.balance;
       const currentBalance = blockchainDotComBalanceResponse[address.address]?.final_balance;
 
-      if (currentBalance !== previousBalance)
+      if (currentBalance != null && currentBalance !== previousBalance)
       {
         console.debug(`Balance for address ${address.address} has changed from ${previousBalance} to ${currentBalance}`);
 
@@ -180,7 +180,12 @@ export class AlertRuleService
           oldBalance: previousBalance,
           newBalance: currentBalance
         });
-      } else
+      }
+      else if (currentBalance == null)
+      {
+        console.error(`Balance for address ${address.address} (${email}) could not be retrieved`);
+      }
+      else
       {
         console.debug(`Balance for address ${address.address} has not changed from ${currentBalance}`);
       }
@@ -237,6 +242,12 @@ export class AlertRuleService
           new ValidationErrors().addDetail('The specified address is not valid', 'address')
         );
       }
+      if (response.status !== 200)
+      {
+        throw new BwaError(
+          'An error occurred while retrieving the balances: ' + (await response.json()),
+          500);
+      }
 
       const batchResponse: BlockchainDotComBalanceResponse = await response.json();
       Object.assign(balanceResponses, batchResponse);
@@ -247,6 +258,44 @@ export class AlertRuleService
 
     return balanceResponses;
   }
+
+  static async retrieveBalancesFromLuna(addresses: string[]): Promise<LunaBalanceResponse>
+  {
+    const batchSize = 500;
+    const balanceResponses: LunaBalanceResponse = {};
+
+    for (let i = 0; i < addresses.length; i += batchSize)
+    {
+      const batch = addresses.slice(i, i + batchSize);
+      const lunaRequest = {
+        addresses: batch
+      };
+      // perform a post request
+      const response = await fetch('https://luna.watchmybtc.com/api/v1/addresses/get-balances', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(lunaRequest)
+      });
+
+      if (response.status === 400)
+      {
+        throw new ValidationError(
+          new ValidationErrors().addDetail('The specified address is not valid', 'address')
+        );
+      }
+
+      const batchResponse: LunaBalanceResponse = await response.json();
+      Object.assign(balanceResponses, batchResponse);
+      console.debug(`Balance response: ${JSON.stringify(batchResponse)} from response ${JSON.stringify(response)} for addresses ${JSON.stringify(batch)}`);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    return balanceResponses;
+  }
+
 
   static async putAlertRuleDynamoItem(alertRule: AlertRule): Promise<void>
   {
@@ -455,6 +504,19 @@ export interface BlockchainDotComBalanceResponse
 {
   [address: string]: {
     final_balance: number;
+  };
+}
+
+export interface LunaBalanceRequest
+{
+  addresses: string[];
+}
+
+export interface LunaBalanceResponse
+{
+  [address: string]: {
+    confirmed: number;
+    unconfirmed: number;
   };
 }
 

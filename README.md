@@ -5,21 +5,25 @@ when a change is detected.
 
 The project is in a very early stage. I've open sourced the code in the interest of
 transparency and trust, and in the spirit of the Bitcoin community. My aim was not
-to create a polished, turn-key solution, although I may do that as another project. 
-I may implement the same functionality, but as an application that can run locally 
-or on any infrastructure, rather than specific to AWS.
+to create a polished, turn-key solution, although I may do that as another project.
+I've now implemented a new version of the service (see below).
 
-## Big Changes/Improvements Coming
+## New Version!!! [luna.watchmybtc.com](https://luna.watchmybtc.com)
 
-Proof of concept has been completed and I am in the early stages of rewriting this service. It has proven to be
-popular and so I will be completing a full rewrite, which will be far more robust and efficient. It will also bring
-a number of new features, such as:
+A completely new and separate version of Watch My BTC has been released. It employs
+a completely different architecture in order to support a broader and more robust
+set of features. Among the new features are:
 
-* xpub monitoring
-* Ability to view and manage all alerts and balances in a single dashboard
-* System health (a system status dashboard and api)
-* webhook support (and potentially other integrations: slack, telegram, etc)
-* Still thinking of others (feel free to suggest enhancements)
+* Account creation, login, management and dashboard
+* XPUB monitoring
+* Regualr address monitoring
+* Configurable alerts (email, slack, discord, webhooks)
+* More coming
+
+You can access the new version at [luna.watchmybtc.com](https://luna.watchmybtc.com).
+
+**Please use the new version instead of this one. This version will not be updated**. The source
+code for the new version has not been open sourced yet, but it may be in the future.
 
 ## Hosted Version
 
