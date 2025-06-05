@@ -59,8 +59,8 @@ data "archive_file" "process_alert_rule_lambda" {
 
 resource "aws_lambda_function" "process_alert_rule_lambda" {
   function_name    = "${var.prefix}_process_alert_rule_lambda"
-  filename         = data.archive_file.process_alert_rule_lambda.output_path
-  runtime          = "nodejs18.x"
+  filename         = data.archive_file.process_alert_rule_lambda.output_pathtf
+  runtime          = "nodejs22.x"
   handler          = "process-alert-rule-lambda/index.handler"
   source_code_hash = filebase64sha256(data.archive_file.process_alert_rule_lambda.output_path)
   role             = aws_iam_role.process_alert_rule_lambda_role.arn

@@ -50,7 +50,7 @@ data "archive_file" "contact_us_lambda" {
 resource "aws_lambda_function" "contact_us_lambda" {
   function_name    = "${var.prefix}_contact_us_lambda"
   filename         = data.archive_file.contact_us_lambda.output_path
-  runtime          = "nodejs18.x"
+  runtime          = "nodejs22.x"
   handler          = "contact-us-lambda/index.handler"
   source_code_hash = filebase64sha256(data.archive_file.contact_us_lambda.output_path)
   role             = aws_iam_role.contact_us_lambda_role.arn

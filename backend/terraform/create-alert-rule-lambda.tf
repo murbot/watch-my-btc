@@ -61,7 +61,7 @@ data "archive_file" "create_alert_rule_lambda" {
 resource "aws_lambda_function" "create_alert_rule_lambda" {
   function_name    = "${var.prefix}_create_alert_rule_lambda"
   filename         = data.archive_file.create_alert_rule_lambda.output_path
-  runtime          = "nodejs18.x"
+  runtime          = "nodejs22.x"
   handler          = "create-alert-rule-lambda/index.handler"
   source_code_hash = filebase64sha256(data.archive_file.create_alert_rule_lambda.output_path)
   role             = aws_iam_role.create_alert_rule_lambda_role.arn
